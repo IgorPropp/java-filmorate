@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 public class FilmController {
 
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private final HashMap <Integer, Film> films = new HashMap<>();
     private int filmId = 1;
 
     @GetMapping("/films")
