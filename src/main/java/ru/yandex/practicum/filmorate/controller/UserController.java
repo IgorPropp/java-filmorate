@@ -39,16 +39,14 @@ public class UserController {
         if (users.containsKey(updatedUser.getId())) {
             users.put(updatedUser.getId(), updatedUser);
         } else {
-            throw new ValidationException("Пользователя для обновления не существует");
+            throw new ValidationException("Пользователя с данным id не существует");
         }
         log.info("Обновлен пользователь");
         return updatedUser;
     }
 
     protected void validateUser(User user) throws ValidationException {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")
-                || user.getLogin().isBlank() || user.getLogin().contains(" ")
-                || user.getBirthday().isAfter(LocalDate.now())) {
+        if (!allUserFieldsAreValid(user)) {
             log.info("Профиль пользователя не прошел валидацию");
             throw new ValidationException("Профиль пользователя не прошел валидацию");
         }
@@ -56,5 +54,11 @@ public class UserController {
             user.setName(user.getLogin());
             log.info("Имя пользователя заменено на логин");
         }
+    }
+
+    private boolean allUserFieldsAreValid(User user) {
+        return !(user.getEmail().isBlank() || !user.getEmail().contains("@")
+                || user.getLogin().isBlank() || user.getLogin().contains(" ")
+                || user.getBirthday().isAfter(LocalDate.now()));
     }
 }

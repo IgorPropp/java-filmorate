@@ -14,11 +14,11 @@ import java.util.List;
 @RestController
 public class FilmController {
 
-    private final HashMap <Integer, Film> films = new HashMap<>();
+    private final HashMap<Integer, Film> films = new HashMap<>();
     private int filmId = 1;
 
     @GetMapping("/films")
-    public List <Film> getFilms() {
+    public List<Film> getFilms() {
         return new ArrayList<>(films.values());
     }
 
@@ -38,18 +38,22 @@ public class FilmController {
         if (films.containsKey(updatedFilm.getId())) {
             films.put(updatedFilm.getId(), updatedFilm);
         } else {
-            throw new ValidationException("Фильма для обновления не существует");
+            throw new ValidationException("Фильма с данным id не существует");
         }
         log.info("Обновлен фильм");
         return updatedFilm;
     }
 
     protected void validateFilm(Film film) throws ValidationException {
-        if (film.getName().isBlank() || film.getDescription().length() > 200 ||
-                film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)) ||
-                film.getDuration() <= 0) {
+        if (!allFilmFieldsAreValid(film)) {
             log.info("Фильм не прошел валидацию");
             throw new ValidationException("Фильм не прошел валидацию");
         }
+    }
+
+    private boolean allFilmFieldsAreValid(Film film) {
+        return !(film.getName().isBlank() || film.getDescription().length() > 200 ||
+                film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)) ||
+                film.getDuration() <= 0);
     }
 }
