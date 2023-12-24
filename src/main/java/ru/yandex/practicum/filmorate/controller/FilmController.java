@@ -48,7 +48,7 @@ public class FilmController {
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
-    public Film putLike (@PathVariable int id, @PathVariable int userId) throws NoSuchEntityException {
+    public Film putLike(@PathVariable int id, @PathVariable int userId) throws NoSuchEntityException {
         if (filmStorage.hasFilm(id) && userStorage.hasUser(userId)) {
             return filmService.putLike(id, userId);
         } else {
@@ -57,7 +57,7 @@ public class FilmController {
     }
 
     @DeleteMapping(value = "/films/{id}/like/{userId}")
-    public Film deleteLike (@PathVariable int id, @PathVariable int userId) throws NoSuchEntityException {
+    public Film deleteLike(@PathVariable int id, @PathVariable int userId) throws NoSuchEntityException {
         if (filmStorage.hasFilm(id) && userStorage.hasUser(userId)) {
             return filmService.deleteLike(id, userId);
         } else {
