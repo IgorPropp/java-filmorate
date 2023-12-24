@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface FilmStorage {
 
     List<Film> getFilms(Optional<Integer> id);
+
     Film createFilm(Film film) throws ValidationException;
+
     Film updateFilm(Film updatedFilm) throws ValidationException;
 }

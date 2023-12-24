@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface UserStorage {
 
     List<User> getUsers(Optional<Integer> id);
+
     User createUser(User user) throws ValidationException;
+
     User updateUser(User updatedUser) throws ValidationException;
 }
