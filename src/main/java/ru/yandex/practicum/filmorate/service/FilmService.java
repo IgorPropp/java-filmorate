@@ -21,14 +21,14 @@ public class FilmService {
         this.filmStorage = filmStorage;
     }
 
-    public Film putLike (int id, int userId) {
+    public Film putLike(int id, int userId) {
         Set<Integer> pastLikes = new HashSet<>(filmStorage.getFilms(Optional.of(id)).get(0).getLikes());
         pastLikes.add(userId);
         filmStorage.getFilms(Optional.of(id)).get(0).setLikes(pastLikes);
         return filmStorage.getFilms(Optional.of(id)).get(0);
     }
 
-    public Film deleteLike (int id, int userId) {
+    public Film deleteLike(int id, int userId) {
         filmStorage.getFilms(Optional.of(id)).get(0).getLikes().remove(userId);
         return filmStorage.getFilms(Optional.of(id)).get(0);
     }
