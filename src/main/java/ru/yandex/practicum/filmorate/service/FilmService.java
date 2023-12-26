@@ -2,50 +2,83 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.controller.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.ValidationException;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
 
-    FilmStorage filmStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
-    public Film putLike(int id, int userId) {
-        Set<Integer> pastLikes = new HashSet<>(filmStorage.getFilms(Optional.of(id)).get(0).getLikes());
-        pastLikes.add(userId);
-        filmStorage.getFilms(Optional.of(id)).get(0).setLikes(pastLikes);
-        return filmStorage.getFilms(Optional.of(id)).get(0);
+    public Film createFilm(Film film) {
+        return filmStorage.createFilm(film);
     }
 
-    public Film deleteLike(int id, int userId) {
-        filmStorage.getFilms(Optional.of(id)).get(0).getLikes().remove(userId);
-        return filmStorage.getFilms(Optional.of(id)).get(0);
-    }
-
-    public List<Film> getTopFilms(Integer count) {
-        List<Film> topFilms = filmStorage.getFilms(Optional.empty()).stream()
-                .sorted((Film film1, Film film2) -> (film2.getLikes().size() - film1.getLikes().size()))
-                .collect(Collectors.toList());
-        if (count - 1 == 0) {
-            return List.of(topFilms.get(0));
-        } else if (topFilms.size() > count) {
-            return topFilms.subList(0, count - 1);
+    public Film updateFilm(Film updatedFilm) throws ValidationException {
+        if (hasFilm(updatedFilm.getId())) {
+            return filmStorage.updateFilm(updatedFilm);
         } else {
-            return topFilms;
+            throw new ValidationException("Фильма с данным id не существует");
         }
     }
 
+    public List<Film> getFilms() {
+        return filmStorage.getFilms();
+    }
 
+    public Film getFilm(int id) {
+        Optional<Film> film = filmStorage.getFilm(id);
+        if (film.isPresent()) {
+            return film.get();
+        } else {
+            throw new NoSuchEntityException("Нет фильма с таким id");
+        }
+    }
+
+    public Film putLike(int id, int userId) {
+        if (!filmStorage.hasFilm(id)) {
+            throw new NoSuchEntityException("Фильма с таким id не существует");
+        } else if (!userStorage.hasUser(userId)) {
+            throw new NoSuchEntityException("Пользователя с таким id не существует");
+        } else {
+            Set<Integer> pastLikes = new HashSet<>(getFilm(id).getLikes());
+            pastLikes.add(userId);
+            getFilm(id).setLikes(pastLikes);
+            return getFilm(id);
+        }
+
+    }
+
+    public Film deleteLike(int id, int userId) {
+        if (filmStorage.hasFilm(id) && userStorage.hasUser(userId)) {
+            getFilm(id).getLikes().remove(userId);
+            return getFilm(id);
+        } else {
+            throw new NoSuchEntityException("Пользователя или фильма с таким id не существует");
+        }
+    }
+
+    public List<Film> getTopFilms(Integer count) {
+        return filmStorage.getTopFilms(count);
+    }
+
+    private boolean hasFilm(int id) {
+        return filmStorage.hasFilm(id);
+    }
 
 }

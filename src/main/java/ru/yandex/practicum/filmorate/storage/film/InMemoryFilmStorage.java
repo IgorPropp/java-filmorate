@@ -2,14 +2,13 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.storage.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -18,12 +17,19 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final HashMap<Integer, Film> films = new HashMap<>();
     private int filmId = 1;
 
-    public List<Film> getFilms(Optional<Integer> id) {
-        return id.map(integer -> List.of(films.get(integer))).orElseGet(() -> new ArrayList<>(films.values()));
+    public List<Film> getFilms() {
+        return new ArrayList<>(films.values());
     }
 
-    public Film createFilm(Film film) throws ValidationException {
-        validateFilm(film);
+    public Optional<Film> getFilm(int id) {
+        if (films.containsKey(id)) {
+            return Optional.ofNullable(films.get(id));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Film createFilm(Film film) {
         film.setId(filmId);
         films.put(filmId, film);
         filmId++;
@@ -31,31 +37,26 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public Film updateFilm(Film updatedFilm) throws ValidationException {
-        validateFilm(updatedFilm);
-        if (films.containsKey(updatedFilm.getId())) {
-            films.put(updatedFilm.getId(), updatedFilm);
-        } else {
-            throw new ValidationException("Фильма с данным id не существует");
-        }
+    public Film updateFilm(Film updatedFilm) {
+        films.put(updatedFilm.getId(), updatedFilm);
         log.info("Обновлен фильм");
         return updatedFilm;
     }
 
-    public boolean hasFilm(int id) {
-        return films.containsKey(id);
-    }
-
-    public void validateFilm(Film film) throws ValidationException {
-        if (!allFilmFieldsAreValid(film)) {
-            log.info("Фильм не прошел валидацию");
-            throw new ValidationException("Фильм не прошел валидацию");
+    public List<Film> getTopFilms(int count) {
+        List<Film> topFilms = films.values().stream()
+                .sorted((Film film1, Film film2) -> (film2.getLikes().size() - film1.getLikes().size()))
+                .collect(Collectors.toList());
+        if (count - 1 == 0) {
+            return List.of(topFilms.get(0));
+        } else if (topFilms.size() > count) {
+            return topFilms.subList(0, count - 1);
+        } else {
+            return topFilms;
         }
     }
 
-    private boolean allFilmFieldsAreValid(Film film) {
-        return !(film.getName().isBlank() || film.getDescription().length() > 200 ||
-                film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)) ||
-                film.getDuration() <= 0);
+    public boolean hasFilm(int id) {
+        return films.containsKey(id);
     }
 }
