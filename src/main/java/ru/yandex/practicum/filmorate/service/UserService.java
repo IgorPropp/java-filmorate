@@ -35,7 +35,7 @@ public class UserService {
         return userStorage.createUser(user);
     }
 
-    public User updateUser(User updatedUser){
+    public User updateUser(User updatedUser) {
         if (hasUser(updatedUser.getId())) {
             return userStorage.updateUser(updatedUser);
         } else {
