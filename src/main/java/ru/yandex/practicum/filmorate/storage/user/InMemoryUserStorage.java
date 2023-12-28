@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -9,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
@@ -32,13 +30,11 @@ public class InMemoryUserStorage implements UserStorage {
         user.setId(userId);
         users.put(userId, user);
         userId++;
-        log.info("Добавлен пользователь");
         return user;
     }
 
     public User updateUser(User updatedUser) {
         users.put(updatedUser.getId(), updatedUser);
-        log.info("Обновлен пользователь");
         return updatedUser;
     }
 
