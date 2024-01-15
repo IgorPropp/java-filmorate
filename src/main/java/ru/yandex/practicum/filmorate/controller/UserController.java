@@ -1,51 +1,69 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.ValidationException;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
+@RequestMapping("/users")
 public class UserController {
 
-    private final HashMap<Integer, User> users = new HashMap<>();
-    private int userId = 1;
+    private final UserService userService;
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> getUsers() {
-        return new ArrayList<>(users.values());
+        return userService.getUsers();
     }
 
-    @PostMapping("/users")
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable @Positive int id) {
+        return userService.getUser(id);
+    }
+
+    @PostMapping
     public User createUser(@Valid @RequestBody User user) throws ValidationException {
         validateUser(user);
-        user.setId(userId);
-        users.put(userId, user);
-        userId++;
-        log.info("Добавлен пользователь");
-        return user;
+        return userService.createUser(user);
     }
 
-    @PutMapping("/users")
+    @PutMapping
     public User updateUser(@Valid @RequestBody User updatedUser) throws ValidationException {
         validateUser(updatedUser);
-        if (users.containsKey(updatedUser.getId())) {
-            users.put(updatedUser.getId(), updatedUser);
-        } else {
-            throw new ValidationException("Пользователя с данным id не существует");
-        }
-        log.info("Обновлен пользователь");
-        return updatedUser;
+        return userService.updateUser(updatedUser);
     }
 
-    protected void validateUser(User user) throws ValidationException {
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable @Positive int id, @PathVariable @Positive int friendId) {
+        return userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User deleteFriend(@PathVariable @Positive int id, @PathVariable @Positive int friendId) throws NoSuchEntityException {
+        return userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable @Positive int id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable @Positive int id, @PathVariable @Positive int otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    public void validateUser(User user) throws ValidationException {
         if (!allUserFieldsAreValid(user)) {
             log.info("Профиль пользователя не прошел валидацию");
             throw new ValidationException("Профиль пользователя не прошел валидацию");
