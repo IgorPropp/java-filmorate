@@ -31,16 +31,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser (User user) {
+    public User updateUser(User user) {
         String sqlQuery = "update users set " +
                 "email = ?, login = ?, name = ?, birthday = ? " +
                 "where id = ?";
-        jdbcTemplate.update(sqlQuery
-                , user.getEmail()
-                , user.getLogin()
-                , user.getName()
-                , user.getBirthday()
-                , user.getId());
+        jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         return getUser(user.getId()).orElseThrow();
     }
 
@@ -61,11 +56,11 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
-    public User addFriend(int id, int friend_id) {
+    public User addFriend(int id, int friendId) {
         String sql = "insert into friends(USER_A, USER_B, ACCEPTED) " +
                 "values (?, ?, ?)";
-        jdbcTemplate.update(sql, id, friend_id, Boolean.TRUE);
-        return getUser(friend_id).orElseThrow();
+        jdbcTemplate.update(sql, id, friendId, Boolean.TRUE);
+        return getUser(friendId).orElseThrow();
     }
 
     public User deleteFriend(int id, int friendId) {
