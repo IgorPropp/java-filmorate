@@ -51,7 +51,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    public Film updateFilm (Film film) {
+    public Film updateFilm(Film film) {
         String sql = "update films set name = ?, description = ?, release_date = ?, duration = ?, mpa = ? where id = ?";
         jdbcTemplate.update(sql,
                 film.getName(),
@@ -138,8 +138,8 @@ public class FilmDbStorage implements FilmStorage {
                 (rs, rowNum) -> rs.getInt("genre_id"), id);
         Collections.sort(response);
         Set<Genre> genres = new HashSet<>();
-        for (Integer genre_id : response) {
-            genres.add(getGenreById(genre_id));
+        for (Integer genreId : response) {
+            genres.add(getGenreById(genreId));
         }
         return genres;
     }
