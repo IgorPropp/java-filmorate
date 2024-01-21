@@ -23,6 +23,8 @@ public class Film {
     @NotNull
     private int duration;
     private Set<Integer> likes = new HashSet<>();
+    private Mpa mpa;
+    private Set<Genre> genres = new HashSet<>();
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;
@@ -31,4 +33,9 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
     }
+
+    public Film() {
+
+    }
+
 }

@@ -3,11 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.controller.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,7 +32,7 @@ public class UserService {
             return userStorage.updateUser(updatedUser);
         } else {
             throw new NoSuchEntityException("Пользователя с данным id не существует");
-        }
+       }
     }
 
     public List<User> getUsers() {
@@ -51,14 +52,8 @@ public class UserService {
 
     public User addFriend(int id, int friendId) {
         if (hasUser(id) && hasUser(friendId)) {
-            Set<Integer> pastFriends = new HashSet<>(getUser(id).getFriends());
-            pastFriends.add(friendId);
-            getUser(id).setFriends(pastFriends);
-            pastFriends = new HashSet<>((getUser(friendId)).getFriends());
-            pastFriends.add(id);
-            getUser(friendId).setFriends(pastFriends);
             log.info("Пользователь id=" + id + " добавил друга friendId=" + friendId);
-            return getUser(friendId);
+            return userStorage.addFriend(id, friendId);
         } else {
             throw new NoSuchEntityException("Пользователя с данным id не существует");
         }
@@ -66,9 +61,8 @@ public class UserService {
 
     public User deleteFriend(int id, int friendId) {
         if (hasUser(id) && hasUser(friendId)) {
-            getUser(id).getFriends().remove(friendId);
             log.info("Пользователь id=" + id + " удалил друга friendId=" + friendId);
-            return getUser(friendId);
+            return userStorage.deleteFriend(id, friendId);
         } else {
             throw new NoSuchEntityException("Нет пользвателя с таким id");
         }
@@ -81,6 +75,7 @@ public class UserService {
                 friendsList.add(getUser(friendId));
             }
             log.info("Запрошен список друзей пользователя id=" + id);
+            friendsList.sort(Comparator.comparingInt(User::getId));
             return friendsList;
         } else {
             throw new NoSuchEntityException("Нет пользвателя с таким id");
@@ -96,7 +91,7 @@ public class UserService {
                 commonFriends.add(getUser(commonFriendId));
             }
             log.info("Запрошен список общих друзей пользователей id=" + id + " и otherId=" + otherId);
-            return commonFriends;
+            return commonFriends.stream().sorted(Comparator.comparingInt(User::getId)).collect(Collectors.toList());
         } else {
             throw new NoSuchEntityException("Нет пользвателя с таким id");
         }
