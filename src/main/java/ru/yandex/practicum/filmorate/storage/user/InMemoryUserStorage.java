@@ -50,7 +50,4 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 
-    public boolean hasUser(int id) {
-        return users.containsKey(id);
-    }
 }

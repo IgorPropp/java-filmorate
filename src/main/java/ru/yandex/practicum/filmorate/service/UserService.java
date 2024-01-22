@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.exception.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -42,12 +42,8 @@ public class UserService {
 
     public User getUser(int id) {
         Optional<User> user = userStorage.getUser(id);
-        if (user.isPresent()) {
-            log.info("Запрошен пользватель с id=" + id);
-            return user.get();
-        } else {
-            throw new NoSuchEntityException("Нет пользователя с таким id");
-        }
+        log.info("Запрошен пользватель с id=" + id);
+        return user.orElseThrow();
     }
 
     public User addFriend(int id, int friendId) {
@@ -83,7 +79,7 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
-        if (userStorage.hasUser(id) && userStorage.hasUser(otherId)) {
+        if (userStorage.getUser(id).isPresent() && userStorage.getUser(otherId).isPresent()) {
             List<Integer> commonFriendsIds = new ArrayList<>(getUser(id).getFriends());
             commonFriendsIds.retainAll(getUser(otherId).getFriends());
             List<User> commonFriends = new ArrayList<>();
@@ -91,13 +87,15 @@ public class UserService {
                 commonFriends.add(getUser(commonFriendId));
             }
             log.info("Запрошен список общих друзей пользователей id=" + id + " и otherId=" + otherId);
-            return commonFriends.stream().sorted(Comparator.comparingInt(User::getId)).collect(Collectors.toList());
+            return commonFriends.stream()
+                    .sorted(Comparator.comparingInt(User::getId))
+                    .collect(Collectors.toList());
         } else {
             throw new NoSuchEntityException("Нет пользвателя с таким id");
         }
     }
 
     private boolean hasUser(int id) {
-        return userStorage.hasUser(id);
+        return userStorage.getUser(id).isPresent();
     }
 }

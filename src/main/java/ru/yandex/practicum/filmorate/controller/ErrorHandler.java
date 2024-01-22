@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,6 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.filmorate.exception.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -30,6 +34,13 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNoSuchEntityException(final NoSuchEntityException e) {
         log.error("Ошибка: Сущность не найдена");
+        return new ErrorResponse("Не найдено", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoSuchElementException(final NoSuchElementException e) {
+        log.error("Ошибка: Такого элемента не существует");
         return new ErrorResponse("Не найдено", e.getMessage());
     }
 

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 public class Film {
 
     private int id;
@@ -33,9 +35,4 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
     }
-
-    public Film() {
-
-    }
-
 }

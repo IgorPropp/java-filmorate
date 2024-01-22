@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.NoSuchEntityException;
 
 import java.sql.*;
 import java.util.List;
@@ -32,45 +31,42 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        String sqlQuery = "update users set " +
+        String sqlQuery = "UPDATE users SET " +
                 "email = ?, login = ?, name = ?, birthday = ? " +
-                "where id = ?";
-        jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
+                "WHERE id = ?";
+        jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),
+                user.getBirthday(), user.getId());
         return getUser(user.getId()).orElseThrow();
     }
 
     public Optional<User> getUser(int id) {
-        String sqlQuery = "select id, email, login, name, birthday " +
-                "from users as u left outer join friends as fr on u.id=user_a where id = ?";
+        String sqlQuery = "SELECT id, email, login, name, birthday " +
+                "FROM users AS u LEFT OUTER JOIN friends AS fr ON u.id=user_a WHERE id = ?";
         List<User> users = jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
         if (users.isEmpty()) {
-            throw new NoSuchEntityException("Нет пользователя с таким ID");
+            return Optional.empty();
         } else {
             return Optional.of(users.get(0));
         }
     }
 
     public List<User> getUsers() {
-        String sqlQuery = "select id, email, login, name, birthday" +
-                " from users as u left outer join friends as fr on u.id=user_a";
+        String sqlQuery = "SELECT id, email, login, name, birthday" +
+                " FROM users AS u LEFT OUTER JOIN friends AS fr ON u.id=user_a";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
 
     public User addFriend(int id, int friendId) {
-        String sql = "insert into friends(USER_A, USER_B, ACCEPTED) " +
-                "values (?, ?, ?)";
+        String sql = "INSERT INTO friends(USER_A, USER_B, ACCEPTED) " +
+                "VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, id, friendId, Boolean.TRUE);
         return getUser(friendId).orElseThrow();
     }
 
     public User deleteFriend(int id, int friendId) {
-        String sql = "delete from friends where USER_A = ? and USER_B = ?";
+        String sql = "DELETE FROM friends WHERE USER_A = ? AND USER_B = ?";
         jdbcTemplate.update(sql, id, friendId);
         return getUser(id).orElseThrow();
-    }
-
-    public boolean hasUser(int id) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("SELECT EXISTS(SELECT FROM users WHERE id = ?)", Boolean.class, id));
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
@@ -85,7 +81,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     private Set<Integer> getFriends(int id) {
-        String sqlQuery = "select user_b from friends where user_a = ?";
+        String sqlQuery = "SELECT user_b FROM friends WHERE user_a = ?";
         return Set.copyOf(jdbcTemplate.query(sqlQuery, (rs, rowNum) -> rs.getInt("user_b"), id));
     }
 }

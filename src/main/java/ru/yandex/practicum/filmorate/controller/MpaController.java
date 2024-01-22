@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import javax.validation.constraints.Positive;
 import java.util.Set;
@@ -17,20 +17,20 @@ import java.util.Set;
 @Slf4j
 public class MpaController {
 
-    private final FilmService filmService;
+    private final MpaService mpaService;
 
     @Autowired
-    public MpaController(FilmService filmService) {
-        this.filmService = filmService;
+    public MpaController(MpaService mpaService) {
+        this.mpaService = mpaService;
     }
 
     @GetMapping
     public Set<Mpa> getRatings() {
-        return filmService.getRatings();
+        return mpaService.getRatings();
     }
 
     @GetMapping(value = "/{id}")
     public Mpa getRatingById(@PathVariable @Positive int id) {
-        return filmService.getRatingById(id);
+        return mpaService.getRatingById(id);
     }
 }

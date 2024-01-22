@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 public class User {
 
     private int id;
@@ -33,10 +35,6 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-    }
-
-    public User() {
-
     }
 
     public Map<String, Object> toMap() {
