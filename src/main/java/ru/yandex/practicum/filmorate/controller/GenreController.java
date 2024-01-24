@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
 
 import javax.validation.constraints.Positive;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/genres")
@@ -24,7 +24,7 @@ public class GenreController {
     }
 
     @GetMapping
-    public Set<Genre> getGenres() {
+    public List<Genre> getGenres() {
         return genreService.getGenres();
     }
 

@@ -1,33 +1,36 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 @Component
-public class GenreStorage {
+public class GenreDbStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public GenreStorage(JdbcTemplate jdbcTemplate) {
+    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Set<Genre> getGenres() {
+    public List<Genre> getGenres() {
         String sqlQuery = "SELECT id, genre FROM GENRE";
-        return Set.copyOf(jdbcTemplate.query(sqlQuery, this::mapRowToGenre)).stream()
-                .sorted(Comparator.comparingInt(Genre::getId))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
 
-    public Genre getGenreById(int id) {
+    public Optional<Genre> getGenreById(int id) {
         String sqlQuery = "SELECT id, genre FROM GENRE WHERE id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, id);
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, id));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
@@ -35,10 +38,5 @@ public class GenreStorage {
         genre.setId(resultSet.getInt("id"));
         genre.setName(resultSet.getString("genre"));
         return genre;
-    }
-
-    public boolean hasGenre(int id) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT FROM GENRE WHERE id = ?)", Boolean.class, id));
     }
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -9,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Primary
 @Component
@@ -40,18 +40,17 @@ public class UserDbStorage implements UserStorage {
     }
 
     public Optional<User> getUser(int id) {
-        String sqlQuery = "SELECT id, email, login, name, birthday " +
+        String sqlQuery = "SELECT id, email, login, name, birthday, fr.USER_B " +
                 "FROM users AS u LEFT OUTER JOIN friends AS fr ON u.id=user_a WHERE id = ?";
-        List<User> users = jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
-        if (users.isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(users.get(0));
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id));
+        } catch (EmptyResultDataAccessException e) {
+            return  Optional.empty();
         }
     }
 
     public List<User> getUsers() {
-        String sqlQuery = "SELECT id, email, login, name, birthday" +
+        String sqlQuery = "SELECT id, email, login, name, birthday, fr.USER_B" +
                 " FROM users AS u LEFT OUTER JOIN friends AS fr ON u.id=user_a";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
     }
@@ -76,12 +75,11 @@ public class UserDbStorage implements UserStorage {
         user.setLogin(resultSet.getString("login"));
         user.setName(resultSet.getString("name"));
         user.setBirthday(resultSet.getDate("birthday").toLocalDate());
-        user.setFriends(getFriends(user.getId()));
+        if (resultSet.getInt("user_b") != 0) {
+            do {
+                user.getFriends().add(resultSet.getInt("user_b"));
+            } while (resultSet.next() && resultSet.getInt("id") == user.getId());
+        }
         return user;
-    }
-
-    private Set<Integer> getFriends(int id) {
-        String sqlQuery = "SELECT user_b FROM friends WHERE user_a = ?";
-        return Set.copyOf(jdbcTemplate.query(sqlQuery, (rs, rowNum) -> rs.getInt("user_b"), id));
     }
 }

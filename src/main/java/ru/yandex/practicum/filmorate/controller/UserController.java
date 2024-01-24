@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -12,8 +10,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -55,8 +52,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User deleteFriend(@PathVariable @Positive int id, @PathVariable @Positive int friendId)
-            throws NoSuchEntityException {
+    public User deleteFriend(@PathVariable @Positive int id, @PathVariable @Positive int friendId) {
         return userService.deleteFriend(id, friendId);
     }
 
@@ -66,10 +62,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> getCommonFriends(@PathVariable @Positive int id, @PathVariable @Positive int otherId) {
-        return userService.getCommonFriends(id, otherId).stream()
-                .sorted(Comparator.comparingInt(User::getId))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+    public List<User> getCommonFriends(@PathVariable @Positive int id, @PathVariable @Positive int otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 
     public void validateUser(User user) throws ValidationException {

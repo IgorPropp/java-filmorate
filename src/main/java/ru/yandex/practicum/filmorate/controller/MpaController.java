@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
 import javax.validation.constraints.Positive;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/mpa")
@@ -25,7 +25,7 @@ public class MpaController {
     }
 
     @GetMapping
-    public Set<Mpa> getRatings() {
+    public List<Mpa> getRatings() {
         return mpaService.getRatings();
     }
 

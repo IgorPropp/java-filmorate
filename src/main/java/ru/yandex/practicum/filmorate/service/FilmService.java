@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,7 +33,7 @@ public class FilmService {
             log.info("Обновлен фильм");
             return filmStorage.updateFilm(updatedFilm);
         } else {
-            throw new NoSuchEntityException("Фильма с данным id не существует");
+            throw new NoSuchEntityException("Фильма с данным id=" + updatedFilm.getId() + " не существует");
         }
     }
 
@@ -44,9 +43,9 @@ public class FilmService {
     }
 
     public Film getFilm(int id) {
-        Optional<Film> film = filmStorage.getFilm(id);
         log.info("Запрошен фильм с id=" + id);
-        return film.orElseThrow();
+        return filmStorage.getFilm(id)
+                .orElseThrow(() -> new NoSuchEntityException("Не найден фильм с id: " + id));
     }
 
     public Film putLike(int id, int userId) {

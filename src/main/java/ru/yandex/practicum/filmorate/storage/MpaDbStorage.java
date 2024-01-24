@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MpaDbStorage {
@@ -20,21 +19,18 @@ public class MpaDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Set<Mpa> getRatings() {
-        String sqlQuery = "SELECT id, rating FROM MPA";
-        return Set.copyOf(jdbcTemplate.query(sqlQuery, this::mapRowToRating)).stream()
-                .sorted(Comparator.comparingInt(Mpa::getId))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+    public List<Mpa> getRatings() {
+        String sqlQuery = "SELECT id, rating FROM MPA ORDER BY id";
+        return List.copyOf(jdbcTemplate.query(sqlQuery, this::mapRowToRating));
     }
 
-    public Mpa getRatingById(int id) {
+    public Optional<Mpa> getRatingById(int id) {
         String sqlQuery = "SELECT id, rating FROM MPA WHERE id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToRating, id);
-    }
-
-    public boolean hasRating(int id) {
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT FROM MPA WHERE id = ?)", Boolean.class, id));
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToRating, id));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     private Mpa mapRowToRating(ResultSet resultSet, int rowNum) throws SQLException {

@@ -3,12 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -41,9 +42,9 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        Optional<User> user = userStorage.getUser(id);
         log.info("Запрошен пользватель с id=" + id);
-        return user.orElseThrow();
+        return userStorage.getUser(id)
+                .orElseThrow(() -> new NoSuchEntityException("Не найден фильм с id: " + id));
     }
 
     public User addFriend(int id, int friendId) {
@@ -87,9 +88,7 @@ public class UserService {
                 commonFriends.add(getUser(commonFriendId));
             }
             log.info("Запрошен список общих друзей пользователей id=" + id + " и otherId=" + otherId);
-            return commonFriends.stream()
-                    .sorted(Comparator.comparingInt(User::getId))
-                    .collect(Collectors.toList());
+            return commonFriends;
         } else {
             throw new NoSuchEntityException("Нет пользвателя с таким id");
         }

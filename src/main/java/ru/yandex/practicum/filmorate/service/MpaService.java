@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
 
-import java.util.Set;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -20,21 +20,12 @@ public class MpaService {
         this.mpaStorage = mpaStorage;
     }
 
-    public Set<Mpa> getRatings() {
+    public List<Mpa> getRatings() {
         log.info("Запрошен список рейтингов");
         return mpaStorage.getRatings();
     }
 
     public Mpa getRatingById(int id) {
-        if (hasRating(id)) {
-            log.info("Запрошен рейтинг id= " + id);
-            return mpaStorage.getRatingById(id);
-        } else {
-            throw new NoSuchEntityException("Рейтинга с таким ID нет");
-        }
-    }
-
-    private boolean hasRating(int id) {
-        return mpaStorage.hasRating(id);
+        return mpaStorage.getRatingById(id).orElseThrow(() -> new NoSuchEntityException("Не найден рейтинг с id=" + id));
     }
 }
