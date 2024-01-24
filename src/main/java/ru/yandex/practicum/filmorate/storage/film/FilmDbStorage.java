@@ -98,7 +98,7 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM FILMS F LEFT OUTER JOIN PUBLIC.FILM_GENRE FG on F.ID = FG.FILM_ID " +
                 "LEFT OUTER JOIN PUBLIC.MPA M on F.MPA = M.ID " +
                 "LEFT OUTER JOIN PUBLIC.LIKES L on F.ID = L.FILM_ID ";
-        List<Film>films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
         HashMap<Integer, ArrayList<Genre>> relMap = new HashMap<>();
         String sqlQuery2 = "SELECT FG.film_id as film_id, G.id as genre_id, G.genre as genre FROM FILM_GENRE FG " +
                 "LEFT OUTER JOIN GENRE G on FG.GENRE_ID = G.ID";
@@ -140,7 +140,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT OUTER JOIN PUBLIC.MPA M on F.MPA = M.ID " +
                 "LEFT OUTER JOIN PUBLIC.LIKES L on F.ID = L.FILM_ID " +
                 "GROUP BY F.id ORDER BY likes DESC LIMIT ?";
-        List<Film>films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
         HashMap<Integer, ArrayList<Genre>> relMap = new HashMap<>();
         String sqlQuery2 = "SELECT FG.film_id as film_id, G.id as genre_id, G.genre as genre FROM FILM_GENRE FG " +
                 "LEFT OUTER JOIN GENRE G on FG.GENRE_ID = G.ID";
