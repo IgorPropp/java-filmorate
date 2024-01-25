@@ -15,7 +15,9 @@ public interface FilmStorage {
 
     Film updateFilm(Film updatedFilm);
 
-    List<Film> getTopFilms(int count);
+    Film putLike(int id, int userId);
 
-    boolean hasFilm(int id);
+    Film deleteLike(int id, int userId);
+
+    List<Film> getTopFilms(int count);
 }

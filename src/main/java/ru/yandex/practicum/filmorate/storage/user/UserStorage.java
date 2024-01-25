@@ -15,5 +15,7 @@ public interface UserStorage {
 
     User updateUser(User updatedUser);
 
-    boolean hasUser(int id);
+    User addFriend(int id, int friendId);
+
+    User deleteFriend(int id, int friendId);
 }

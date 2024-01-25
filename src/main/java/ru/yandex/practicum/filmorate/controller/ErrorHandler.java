@@ -4,21 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.storage.ValidationException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.filmorate.exception.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 public class ErrorHandler {
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNullPointerException(final NullPointerException e) {
-        log.error("Ошибка: NullPointerException");
-        return new ErrorResponse("Не найдено", e.getMessage());
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

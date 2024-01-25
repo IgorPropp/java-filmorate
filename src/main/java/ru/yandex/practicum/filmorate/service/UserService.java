@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.controller.NoSuchEntityException;
+import ru.yandex.practicum.filmorate.exception.NoSuchEntityException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -31,7 +33,7 @@ public class UserService {
             return userStorage.updateUser(updatedUser);
         } else {
             throw new NoSuchEntityException("Пользователя с данным id не существует");
-        }
+       }
     }
 
     public List<User> getUsers() {
@@ -40,25 +42,15 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        Optional<User> user = userStorage.getUser(id);
-        if (user.isPresent()) {
-            log.info("Запрошен пользватель с id=" + id);
-            return user.get();
-        } else {
-            throw new NoSuchEntityException("Нет пользователя с таким id");
-        }
+        log.info("Запрошен пользватель с id=" + id);
+        return userStorage.getUser(id)
+                .orElseThrow(() -> new NoSuchEntityException("Не найден фильм с id: " + id));
     }
 
     public User addFriend(int id, int friendId) {
         if (hasUser(id) && hasUser(friendId)) {
-            Set<Integer> pastFriends = new HashSet<>(getUser(id).getFriends());
-            pastFriends.add(friendId);
-            getUser(id).setFriends(pastFriends);
-            pastFriends = new HashSet<>((getUser(friendId)).getFriends());
-            pastFriends.add(id);
-            getUser(friendId).setFriends(pastFriends);
             log.info("Пользователь id=" + id + " добавил друга friendId=" + friendId);
-            return getUser(friendId);
+            return userStorage.addFriend(id, friendId);
         } else {
             throw new NoSuchEntityException("Пользователя с данным id не существует");
         }
@@ -66,9 +58,8 @@ public class UserService {
 
     public User deleteFriend(int id, int friendId) {
         if (hasUser(id) && hasUser(friendId)) {
-            getUser(id).getFriends().remove(friendId);
             log.info("Пользователь id=" + id + " удалил друга friendId=" + friendId);
-            return getUser(friendId);
+            return userStorage.deleteFriend(id, friendId);
         } else {
             throw new NoSuchEntityException("Нет пользвателя с таким id");
         }
@@ -81,6 +72,7 @@ public class UserService {
                 friendsList.add(getUser(friendId));
             }
             log.info("Запрошен список друзей пользователя id=" + id);
+            friendsList.sort(Comparator.comparingInt(User::getId));
             return friendsList;
         } else {
             throw new NoSuchEntityException("Нет пользвателя с таким id");
@@ -88,7 +80,7 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
-        if (userStorage.hasUser(id) && userStorage.hasUser(otherId)) {
+        if (userStorage.getUser(id).isPresent() && userStorage.getUser(otherId).isPresent()) {
             List<Integer> commonFriendsIds = new ArrayList<>(getUser(id).getFriends());
             commonFriendsIds.retainAll(getUser(otherId).getFriends());
             List<User> commonFriends = new ArrayList<>();
@@ -103,6 +95,6 @@ public class UserService {
     }
 
     private boolean hasUser(int id) {
-        return userStorage.hasUser(id);
+        return userStorage.getUser(id).isPresent();
     }
 }
